@@ -114,6 +114,7 @@ public class InstalledAppDetails extends Fragment
     private ApplicationsState.AppEntry mAppEntry;
     private boolean mInitialized;
     private boolean mShowUninstalled;
+    private boolean mHaloPolicyIsBlack = true;
     private PackageInfo mPackageInfo;
     private CanBeOnSdCardChecker mCanBeOnSdCardChecker;
     private View mRootView;
@@ -141,7 +142,7 @@ public class InstalledAppDetails extends Fragment
     private Button mForceStopButton;
     private Button mClearDataButton;
     private Button mMoveAppButton;
-    private CompoundButton mNotificationSwitch;
+    private CompoundButton mNotificationSwitch, mHaloState;
 
     private PackageMoveObserver mPackageMoveObserver;
 
@@ -381,13 +382,17 @@ public class InstalledAppDetails extends Fragment
 
     private void initNotificationButton() {
         boolean enabled = true; // default on
+        boolean allowedForHalo = true; // default on
         try {
             enabled = mNotificationManager.areNotificationsEnabledForPackage(mAppEntry.info.packageName,
                     mAppEntry.info.uid);
+            allowedForHalo = mNotificationManager.isPackageAllowedForHalo(mAppEntry.info.packageName);
         } catch (android.os.RemoteException ex) {
             // this does not bode well
         }
         mNotificationSwitch.setChecked(enabled);
+        mHaloState.setChecked((mHaloPolicyIsBlack ? !allowedForHalo : allowedForHalo));
+        mHaloState.setOnCheckedChangeListener(this);
         if (isThisASystemPackage()) {
             mNotificationSwitch.setEnabled(false);
         } else {
@@ -414,6 +419,12 @@ public class InstalledAppDetails extends Fragment
                 ServiceManager.getService(Context.NOTIFICATION_SERVICE));
 
         mCanBeOnSdCardChecker = new CanBeOnSdCardChecker();
+
+        try {
+            mHaloPolicyIsBlack = mNotificationManager.isHaloPolicyBlack();
+        } catch (android.os.RemoteException ex) {
+            // System dead
+        }
 
         // Need to make sure we have loaded applications at this point.
         mSession.resume();
@@ -474,6 +485,9 @@ public class InstalledAppDetails extends Fragment
         mEnableCompatibilityCB = (CheckBox)view.findViewById(R.id.enable_compatibility_cb);
         
         mNotificationSwitch = (CompoundButton) view.findViewById(R.id.notification_switch);
+
+        mHaloState = (CompoundButton) view.findViewById(R.id.halo_state);
+        mHaloState.setText((mHaloPolicyIsBlack ? R.string.app_halo_label_black : R.string.app_halo_label_white));
 
         return view;
     }
@@ -1301,6 +1315,14 @@ public class InstalledAppDetails extends Fragment
         }
     }
 
+    private void setHaloState(boolean state) {
+        try {
+            mNotificationManager.setHaloStatus(mAppEntry.info.packageName, state);
+        } catch (android.os.RemoteException ex) {
+            mHaloState.setChecked(!state); // revert
+        }
+    }
+
     private int getPremiumSmsPermission(String packageName) {
         try {
             if (mSmsManager != null) {
@@ -1398,6 +1420,8 @@ public class InstalledAppDetails extends Fragment
             } else {
                 setNotificationsEnabled(true);
             }
+        } else if (buttonView == mHaloState) {
+            setHaloState(isChecked);
         }
     }
 }
