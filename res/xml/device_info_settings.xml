@@ -114,6 +114,12 @@
                 android:title="@string/pa_version"
                 android:summary="@string/pa_version_default" />
 
+        <!-- Device PD version -->
+        <Preference android:key="pd_version"
+                style="?android:preferenceInformationStyle"
+                android:title="@string/pd_version"
+                android:summary="@string/pd_version_default" />
+
         <!-- Device FCC equipment id -->
         <Preference android:key="fcc_equipment_id"
                 style="?android:preferenceInformationStyle"
