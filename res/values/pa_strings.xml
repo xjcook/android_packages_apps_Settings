@@ -156,6 +156,10 @@
     <string name="pa_version">ParanoidAndroid version</string>
     <string name="pa_version_default">Unknown</string>
 
+    <!--PD version-->
+    <string name="pd_version">XjParaDroid version</string>
+    <string name="pd_version_default">2014-01-24</string>
+
     <!-- Color Picker -->
     <string name="dialog_color_picker">Halo color</string>
     <string name="press_color_to_apply">Press on Color to apply</string>
