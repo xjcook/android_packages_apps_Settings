@@ -158,7 +158,7 @@
 
     <!--PD version-->
     <string name="pd_version">XjParaDroid version</string>
-    <string name="pd_version_default">2014-04-03</string>
+    <string name="pd_version_default">2014-04-09</string>
 
     <!-- Color Picker -->
     <string name="dialog_color_picker">Halo color</string>
